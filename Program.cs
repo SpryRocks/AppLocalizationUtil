@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Net.Http;
-using System.IO;
 using System.Threading.Tasks;
-using NPOI.XSSF.UserModel;
-using NPOI.SS.UserModel;
+using AppLocalizationUtil.Data.Loaders;
+using AppLocalizationUtil.Data.Sources;
 
 namespace AppLocalizationUtil
 {
@@ -16,50 +14,18 @@ namespace AppLocalizationUtil
 
         static async Task Run()
         {
-            using (var client = new HttpClient())
-            {
-                var resId = "";
-                var authKey = "";
-                var url = $"https://onedrive.live.com/download?resid={resId}&authkey={authKey}";
-                
-                using (var result = await client.GetStreamAsync(url))
-                {
-                    using(var file = new FileStream(FilePath, FileMode.Create))
-                    {
-                        await result.CopyToAsync(file);
-                    }
-                }
-            }
+            var resId = "C62576FDA2F2250C!1418";
+            var authKey = "!ACv68v9KMDmOJLE";
+            var fileName = Environment.CurrentDirectory + "/wrk.xlsx";
 
-            IWorkbook workbook = new XSSFWorkbook(FilePath);
+            IFileDownloader fileDownloader = new OneDriveFileDownloader(resId, authKey, fileName);
+            IFileDocumentReader fileDocumentReader = new ExcelFileDocumentReader(new ExcelFileDocumentReader.Configuration());
+            
+            ISource source = new RemoteFileSource(fileDownloader, fileDocumentReader);
 
-            var numberOfSheets = workbook.NumberOfSheets;
+            var document = await source.LoadAsync();
 
-            for (int i = 0; i < numberOfSheets; i++)
-            {
-                var sheet = workbook.GetSheetAt(i);
-
-                for (int rowNum = sheet.FirstRowNum + 1; rowNum < 10000; rowNum++) {
-                    var row = sheet.GetRow(rowNum);
-                    
-                    if (row == null) 
-                    {
-                        Console.WriteLine("---");
-                        break;
-                    }
-
-                    var cell = row.GetCell(0);
-
-                    var value = cell.StringCellValue;
-
-                    Console.WriteLine(value);
-                }
-            }
-        }
-
-        static string FilePath
-        {
-            get { return Environment.CurrentDirectory + "/wrk.xlsx"; }
+            document.ToString();
         }
     }
 }
