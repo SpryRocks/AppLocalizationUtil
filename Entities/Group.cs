@@ -6,5 +6,10 @@ namespace AppLocalizationUtil.Entities
     {
         public string Name { get; set; }
         public IList<LocalizationItem> Items { get; set; }
+
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 }

@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using AppLocalizationUtil.Data.Loaders;
 using AppLocalizationUtil.Data.Sources;
+using AppLocalizationUtil.Entities;
 
 namespace AppLocalizationUtil
 {
@@ -15,11 +17,21 @@ namespace AppLocalizationUtil
         static async Task Run()
         {
             var resId = "C62576FDA2F2250C!1418";
-            var authKey = "!ACv68v9KMDmOJLE";
+            var authKey = "!ACmYyuC16NL5dnU";
             var fileName = Environment.CurrentDirectory + "/wrk.xlsx";
 
             IFileDownloader fileDownloader = new OneDriveFileDownloader(resId, authKey, fileName);
-            IFileDocumentReader fileDocumentReader = new ExcelFileDocumentReader(new ExcelFileDocumentReader.Configuration());
+
+            ExcelConfiguration configuration = new ExcelConfiguration
+            {
+                LanguageColumns = new Dictionary<string, Language>
+                {
+                    { "English (default)", new Language { Id = "en", Name = "English" } },
+                    { "Dutch", new Language { Id = "nl", Name = "Dutch" } }
+                }
+            };
+
+            IFileDocumentReader fileDocumentReader = new ExcelFileDocumentReader(configuration);
             
             ISource source = new RemoteFileSource(fileDownloader, fileDocumentReader);
 
