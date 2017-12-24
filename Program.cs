@@ -17,7 +17,7 @@ namespace AppLocalizationUtil
         static async Task Run()
         {
             var resId = "C62576FDA2F2250C!1418";
-            var authKey = "!ACmYyuC16NL5dnU";
+            var authKey = "";
             var fileName = Environment.CurrentDirectory + "/wrk.xlsx";
 
             IFileDownloader fileDownloader = new OneDriveFileDownloader(resId, authKey, fileName);
@@ -28,7 +28,13 @@ namespace AppLocalizationUtil
                 {
                     { "English (default)", new Language { Id = "en", Name = "English" } },
                     { "Dutch", new Language { Id = "nl", Name = "Dutch" } }
-                }
+                },
+                PlatformKeyColumns = new Dictionary<string, string>
+                {
+                    { "Key (Android)", "Android" },
+                    { "Key (Web)", "Web" }
+                },
+                AppsColumn = "App"
             };
 
             IFileDocumentReader fileDocumentReader = new ExcelFileDocumentReader(configuration);
