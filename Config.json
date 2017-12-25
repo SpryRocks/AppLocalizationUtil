@@ -8,6 +8,17 @@
                 "ResId": "C62576FDA2F2250C!1418",
                 "AuthKey": "!AD1pPffa7vMvUEA"
             }
+        },
+        "Config": {
+            "LanguageColumns": {
+                "English (default)": { "Id": "en", "Name": "English" },
+                "Dutch": { "Id": "nl", "Name": "Dutch" }
+            },
+            "PlatformKeyColumns": {
+                "Key (Android)": "Android",
+                "Key (Web)": "Web"
+            },
+            "AppsColumn": "App"
         }
     },
     "Destinations": {
