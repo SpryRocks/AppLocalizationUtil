@@ -1,0 +1,24 @@
+{
+    "Project": "SaQure",
+    "Source": {
+        "Type": "Excel",
+        "Placement": {
+            "Type": "OneDrive",
+            "Config": {
+                "ResId": "C62576FDA2F2250C!1418",
+                "AuthKey": "!AD1pPffa7vMvUEA"
+            }
+        }
+    },
+    "Destinations": {
+        "Path": "C:\\Users\\maxim\\Documents\\git",
+        "Android": {
+            "Path": "saqure-app-android",
+            "File": "",
+            "Filter": [  ]
+        },
+        "Web": {
+            "Path": "saqure-mobile-site"
+        }
+    }
+}
