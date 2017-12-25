@@ -6,6 +6,7 @@ using AppLocalizationUtil.Data.Loaders;
 using AppLocalizationUtil.Data.Sources;
 using AppLocalizationUtil.Domain.Source;
 using AppLocalizationUtil.Entities;
+using AppLocalizationUtil.Presentation;
 
 namespace AppLocalizationUtil
 {
@@ -13,20 +14,9 @@ namespace AppLocalizationUtil
     {
         static void Main(string[] args)
         {
-            Run().Wait();
-        }
-
-        static async Task Run()
-        {
-            IConfigurationReader reader = new ConfigurationReader("Config.json");
-            var configuration = await reader.ReadAsync();
-
-            ISourceChooser sourceChooser = new SourceChooser();
-            ISource source = sourceChooser.Choose(configuration.Source);
+            string configFileName = "Config.json";
             
-            var document = await source.LoadAsync();
-
-            document.ToString();
-        }
+            AppLocalizationUtillImpl.Run(configFileName).Wait();
+        }   
     }
 }

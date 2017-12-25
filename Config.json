@@ -21,38 +21,45 @@
             "AppsColumn": "App"
         }
     },
-    "Destinations": {
-        "Path": "C:/Users/maxim/Documents/git",
-        "Platforms": [
-            {
-                "Type": "Android",
-                "Path": "saqure-app-android/Sources/SaQure",
-                "File": "saqure.app.presentation/src/main/res/values/strings.xml",
-                "Filter": {
-                    "Apps": [ null ]
-                }
+    "DestinationRoot": "C:/Users/maxim/Documents/git",
+    "Destinations": [
+        {
+            "Type": "Android",
+            "Path": "saqure-app-android/Sources/SaQure/saqure.app.presentation/src/main/res",
+            "Files": {
+                "en": "values/strings.xml",
+                "nl": "values-nl/strings.xml"
             },
-            {
-                "Type": "Android",
-                "Path": "saqure-app-android/Sources/SaQure",
-                "File": "saqure.app.presentation/src/client/res/values/strings.xml",
-                "Filter": {
-                    "Apps": [ "Client" ]
-                }
-            },
-            {
-                "Type": "Android",
-                "Path": "saqure-app-android/Sources/SaQure",
-                "File": "saqure.app.presentation/src/therapist/res/values/strings.xml",
-                "Filter": {
-                    "Apps": [ "Therapist" ]
-                }
-            },
-            {
-                "Type": "Web",
-                "Path": "saqure-mobile-site",
-                "File": "translations.json"
+            "Filter": {
+                "Apps": [ null ]
             }
-        ]
-    }
+        },
+        {
+            "Type": "Android",
+            "Path": "saqure-app-android/Sources/SaQure/saqure.app.presentation/src/client/res",
+            "Files": {
+                "en": "values/strings.xml",
+                "nl": "values-nl/strings.xml"
+            },
+            "Filter": {
+                "Apps": [ "Client" ]
+            }
+        },
+        {
+            "Type": "Android",
+            "Path": "saqure-app-android/Sources/SaQure/saqure.app.presentation/src/therapist/res",
+            "Files": {
+                "en": "values/strings.xml",
+                "nl": "values-nl/strings.xml"
+            },
+            "Filter": {
+                "Apps": [ "Therapist" ]
+            }
+        },
+        {
+            "Type": "Web",
+            "Path": "saqure-mobile-site",
+            "File": "translations.json"
+        }
+    ]
 }
