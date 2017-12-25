@@ -11,14 +11,37 @@
         }
     },
     "Destinations": {
-        "Path": "C:\\Users\\maxim\\Documents\\git",
-        "Android": {
-            "Path": "saqure-app-android",
-            "File": "",
-            "Filter": [  ]
-        },
-        "Web": {
-            "Path": "saqure-mobile-site"
-        }
+        "Path": "C:/Users/maxim/Documents/git",
+        "Platforms": [
+            {
+                "Type": "Android",
+                "Path": "saqure-app-android/Sources/SaQure",
+                "File": "saqure.app.presentation/src/main/res/values/strings.xml",
+                "Filter": {
+                    "Apps": [ null ]
+                }
+            },
+            {
+                "Type": "Android",
+                "Path": "saqure-app-android/Sources/SaQure",
+                "File": "saqure.app.presentation/src/client/res/values/strings.xml",
+                "Filter": {
+                    "Apps": [ "Client" ]
+                }
+            },
+            {
+                "Type": "Android",
+                "Path": "saqure-app-android/Sources/SaQure",
+                "File": "saqure.app.presentation/src/therapist/res/values/strings.xml",
+                "Filter": {
+                    "Apps": [ "Therapist" ]
+                }
+            },
+            {
+                "Type": "Web",
+                "Path": "saqure-mobile-site",
+                "File": "translations.json"
+            }
+        ]
     }
 }
