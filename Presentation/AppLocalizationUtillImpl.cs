@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AppLocalizationUtil.Data.Configuration;
 using AppLocalizationUtil.Data.Destinations;
@@ -21,12 +22,18 @@ namespace AppLocalizationUtil.Presentation
 
             IList<IDestination> destinations = new List<IDestination>();
 
-            destinations.Add(new AndroidXmlResourceWriter { FileName = "C:/Users/maxim/Documents/git/saqure-app-android/Sources/SaQure/saqure.app.presentation/src/main/res/values/strings.xml" });
-
             foreach (var destination in destinations)
             {
                 await destination.WriteAsync(document);
             }
+    
+            var writer = new AndroidXmlResourceWriter(
+                fileName: "C:/Users/maxim/Documents/git/saqure-app-android/Sources/SaQure/saqure.app.presentation/src/main/res/values/strings.xml",
+                language: document.Languages.Where(l => l.Id == "en").Single(),
+                appFilter: null
+            );
+
+            await writer.WriteAsync(document);
         }
     }
 }
