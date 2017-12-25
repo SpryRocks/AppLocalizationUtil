@@ -6,6 +6,5 @@ namespace AppLocalizationUtil.Data.Configuration.Model
     {
         public string Project { get; set; }
         public JObject Source { get; set; }
-        public DestinationsModel Destinations { get; set; }
     }
 }
