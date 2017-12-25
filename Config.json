@@ -21,39 +21,39 @@
             "AppsColumn": "App"
         }
     },
-    "DestinationRoot": "C:/Users/maxim/Documents/git",
+    "DestinationPath": "C:/Users/maxim/Documents/git",
     "Destinations": [
         {
             "Type": "Android",
             "Path": "saqure-app-android/Sources/SaQure/saqure.app.presentation/src/main/res",
             "Files": {
-                "en": "values/strings.xml",
-                "nl": "values-nl/strings.xml"
+                "en": "values/strings_generated.xml",
+                "nl": "values-nl/strings_generated.xml"
             },
             "Filter": {
-                "Apps": [ null ]
+                "App": null
             }
         },
         {
             "Type": "Android",
             "Path": "saqure-app-android/Sources/SaQure/saqure.app.presentation/src/client/res",
             "Files": {
-                "en": "values/strings.xml",
-                "nl": "values-nl/strings.xml"
+                "en": "values/strings_generated.xml",
+                "nl": "values-nl/strings_generated.xml"
             },
             "Filter": {
-                "Apps": [ "Client" ]
+                "App": "Client"
             }
         },
         {
             "Type": "Android",
             "Path": "saqure-app-android/Sources/SaQure/saqure.app.presentation/src/therapist/res",
             "Files": {
-                "en": "values/strings.xml",
-                "nl": "values-nl/strings.xml"
+                "en": "values/strings_generated.xml",
+                "nl": "values-nl/strings_generated.xml"
             },
             "Filter": {
-                "Apps": [ "Therapist" ]
+                "App": "Therapist"
             }
         },
         {

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using AppLocalizationUtil.Data.Configuration;
 using AppLocalizationUtil.Data.Destinations;
 using AppLocalizationUtil.Data.Sources;
+using AppLocalizationUtil.Domain.Destination;
 using AppLocalizationUtil.Domain.Source;
 
 namespace AppLocalizationUtil.Presentation
@@ -20,20 +21,13 @@ namespace AppLocalizationUtil.Presentation
             
             var document = await source.LoadAsync();
 
-            IList<IDestination> destinations = new List<IDestination>();
+            IDestinationChooser destinationChooser = new DestinationChooser(configuration.DestinationPath);
+            IList<IDestination> destinations = destinationChooser.Choose(configuration.Destinations);
 
             foreach (var destination in destinations)
             {
                 await destination.WriteAsync(document);
             }
-    
-            var writer = new AndroidXmlResourceWriter(
-                fileName: "C:/Users/maxim/Documents/git/saqure-app-android/Sources/SaQure/saqure.app.presentation/src/main/res/values/strings.xml",
-                language: document.Languages.Where(l => l.Id == "en").Single(),
-                appFilter: null
-            );
-
-            await writer.WriteAsync(document);
         }
     }
 }

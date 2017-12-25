@@ -11,21 +11,23 @@ namespace AppLocalizationUtil.Data.Destinations
     public class AndroidXmlResourceWriter
     {
         private readonly string _fileName;
-        private readonly Language _language;
+        private readonly string _languageId;
         private readonly string _appFilter;
 
-        public AndroidXmlResourceWriter(string fileName, Language language, string appFilter)
+        public AndroidXmlResourceWriter(string fileName, string languageId, string appFilter)
         {
             _fileName = fileName;
-            _language = language;
+            _languageId = languageId;
             _appFilter = appFilter;
         }
 
         public async Task WriteAsync(Document document)
         {
+            var language = document.Languages.Single(l => l.Id == _languageId);
+            
             var xDocument = new XDocument();
             var xResources = new XElement("resources");
-            
+
             xDocument.Add(xResources);
 
             IDictionary<Group, IList<LocalizationItem>> filteredGroups = new Dictionary<Group, IList<LocalizationItem>>();
@@ -37,9 +39,9 @@ namespace AppLocalizationUtil.Data.Destinations
                 foreach (var item in group.Items) 
                 {
                     bool isFilterCheckPassed = 
-                        ApplyAppFilter(item) && 
-                        ApplyPlatformFilter(item) &&
-                        ApplyLanguageFilter(item);
+                        ApplyAppFilter(item, _appFilter) && 
+                        ApplyAndroidPlatformFilter(item) &&
+                        ApplyLanguageFilter(item, language);
                     
                     if (isFilterCheckPassed)
                     {
@@ -63,7 +65,7 @@ namespace AppLocalizationUtil.Data.Destinations
                 foreach (var item in items)
                 {
                     var key = item.Keys[Platforms.Android];
-                    var value = item.Values[_language];
+                    var value = item.Values[language];
                     
                     var xStringt = new XElement("string", new XAttribute("name", key));
                     xStringt.Value = PrepareValue(value);
@@ -71,7 +73,12 @@ namespace AppLocalizationUtil.Data.Destinations
                 }
             }
 
-            using(var file = new FileStream(_fileName, FileMode.Create))
+            FileInfo fi = new FileInfo(_fileName);
+            DirectoryInfo di = fi.Directory;
+            if (!di.Exists)
+                di.Create();
+
+            using(var file = new FileStream(fi.FullName, FileMode.Create))
             {
                 await xDocument.SaveAsync(file, SaveOptions.None, CancellationToken.None);
             }
@@ -86,29 +93,31 @@ namespace AppLocalizationUtil.Data.Destinations
                 value = "/" + value;
             }
 
+            value = value.Replace("'", "\'");
+
             return value;
         }
 
-        private bool ApplyAppFilter(LocalizationItem item) 
+        private bool ApplyAppFilter(LocalizationItem item, string appFilter) 
         {
-            if (_appFilter == null)
+            if (appFilter == null)
             {
                 return item.Apps.Count < 1;
             }
             else
             {
-                return item.Apps.Contains(_appFilter);
+                return item.Apps.Contains(appFilter);
             }
         }
 
-        private bool ApplyPlatformFilter(LocalizationItem item)
+        private bool ApplyAndroidPlatformFilter(LocalizationItem item)
         {
             return item.Keys.ContainsKey(Platforms.Android);
         }
 
-        private bool ApplyLanguageFilter(LocalizationItem item)
+        private bool ApplyLanguageFilter(LocalizationItem item, Language language)
         {
-            return item.Values.ContainsKey(_language);
+            return item.Values.ContainsKey(language);
         }
     }
 }
