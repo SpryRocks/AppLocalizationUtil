@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -23,6 +24,8 @@ namespace AppLocalizationUtil.Data.Destinations
 
         public async Task WriteAsync(Document document)
         {
+            Console.WriteLine($"Write Android resource .xml file... [{_fileName}]");
+
             var language = document.Languages.Single(l => l.Id == _languageId);
             
             var xDocument = new XDocument();

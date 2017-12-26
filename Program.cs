@@ -16,7 +16,7 @@ namespace AppLocalizationUtil
         {
             string configFileName = "Config.json";
             
-            AppLocalizationUtillImpl.Run(configFileName).Wait();
+            AppLocalizationUtillImpl.Run($"{Environment.CurrentDirectory}/{configFileName}").Wait();
         }   
     }
 }

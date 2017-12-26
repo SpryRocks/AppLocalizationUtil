@@ -16,9 +16,9 @@ namespace AppLocalizationUtil.Data.Configuration
 
         public async Task<ConfigurationModel> ReadAsync()
         {
-            string fileName = $"{Environment.CurrentDirectory}/{FileName}";
+            Console.WriteLine($"Reading... [{FileName}]");
 
-            var configuration = JsonConvert.DeserializeObject<ConfigurationModel>(await File.ReadAllTextAsync(fileName));
+            var configuration = JsonConvert.DeserializeObject<ConfigurationModel>(await File.ReadAllTextAsync(FileName));
 
             return configuration;
         }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,7 +28,7 @@ namespace AppLocalizationUtil.Data.Loaders
 
         private Document ReadInternal()
         {
-            // TODO: implement
+            Console.WriteLine($"Read excel document... [{FileName}]");
 
             List<Group> groups = new List<Group>();
 

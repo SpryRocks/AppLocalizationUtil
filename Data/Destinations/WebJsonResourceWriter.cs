@@ -24,6 +24,8 @@ namespace AppLocalizationUtil.Data.Destinations
 
         public async Task WriteAsync(Document document)
         {
+            Console.WriteLine($"Write Web resource .json file... [{_fileName}]");
+
             IDictionary<Language, LanguageGroup> languages = new Dictionary<Language, LanguageGroup>();
 
             foreach (var language in document.Languages) 
