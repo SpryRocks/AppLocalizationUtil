@@ -31,9 +31,11 @@ namespace AppLocalizationUtil.Data.Loaders
                 var url = $"https://onedrive.live.com/download?resid={_resId}&authkey={_authKey}";
                 
                 using (var result = await client.GetStreamAsync(url))
-                using(var file = new FileStream(FileName, FileMode.Create))
                 {
-                    await result.CopyToAsync(file);
+                    using (var file = new FileStream(FileName, FileMode.Create))
+                    {
+                        await result.CopyToAsync(file);
+                    }
                 }
             }
         }
