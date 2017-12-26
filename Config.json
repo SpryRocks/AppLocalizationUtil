@@ -6,7 +6,7 @@
             "Type": "OneDrive",
             "Config": {
                 "ResId": "C62576FDA2F2250C!1418",
-                "AuthKey": "!AD1pPffa7vMvUEA"
+                "AuthKey": "!AKr7dG-GLi2ZZOA"
             }
         },
         "Config": {
@@ -31,7 +31,7 @@
                 "nl": "values-nl/strings_generated.xml"
             },
             "Filter": {
-                "App": null
+                "App": [ null ]
             }
         },
         {
@@ -42,7 +42,7 @@
                 "nl": "values-nl/strings_generated.xml"
             },
             "Filter": {
-                "App": "Client"
+                "App": [ "Client" ]
             }
         },
         {
@@ -53,13 +53,16 @@
                 "nl": "values-nl/strings_generated.xml"
             },
             "Filter": {
-                "App": "Therapist"
+                "App": [ "Therapist" ]
             }
         },
         {
             "Type": "Web",
             "Path": "saqure-mobile-site",
-            "File": "translations.json"
+            "File": "translations.json",
+            "Filter": {
+                "App": [ null, "Client" ]
+            }
         }
     ]
 }

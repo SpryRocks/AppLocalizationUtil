@@ -12,13 +12,13 @@ namespace AppLocalizationUtil.Data.Destinations
     {
         private readonly string _fileName;
         private readonly string _languageId;
-        private readonly string _appFilter;
+        private readonly IList<string> _appsFilter;
 
-        public AndroidXmlResourceWriter(string fileName, string languageId, string appFilter)
+        public AndroidXmlResourceWriter(string fileName, string languageId, IList<string> appsFilter)
         {
             _fileName = fileName;
             _languageId = languageId;
-            _appFilter = appFilter;
+            _appsFilter = appsFilter;
         }
 
         public async Task WriteAsync(Document document)
@@ -39,7 +39,7 @@ namespace AppLocalizationUtil.Data.Destinations
                 foreach (var item in group.Items) 
                 {
                     bool isFilterCheckPassed = 
-                        ApplyAppFilter(item, _appFilter) && 
+                        ApplyAppFilter(item, _appsFilter) && 
                         ApplyAndroidPlatformFilter(item) &&
                         ApplyLanguageFilter(item, language);
                     
@@ -98,16 +98,23 @@ namespace AppLocalizationUtil.Data.Destinations
             return value;
         }
 
-        private bool ApplyAppFilter(LocalizationItem item, string appFilter) 
+        private bool ApplyAppFilter(LocalizationItem item, IList<string> appsFilter) 
         {
-            if (appFilter == null)
+            foreach (var appFilter in appsFilter)
             {
-                return item.Apps.Count < 1;
+                if (appFilter == null)
+                {
+                    if (item.Apps.Count < 1)
+                        return true;
+                }
+                else
+                {
+                    if (item.Apps.Contains(appFilter))
+                        return true;
+                }
             }
-            else
-            {
-                return item.Apps.Contains(appFilter);
-            }
+
+            return false;
         }
 
         private bool ApplyAndroidPlatformFilter(LocalizationItem item)

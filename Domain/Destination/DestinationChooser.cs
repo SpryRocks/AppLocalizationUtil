@@ -52,9 +52,9 @@ namespace AppLocalizationUtil.Domain.Destination
             IList<AndroidXmlResourceWriter> writers = new List<AndroidXmlResourceWriter>();
 
             IDictionary<string, string> languageId_files = destinationConfig["Files"].ToObject<IDictionary<string, string>>();
-            IDictionary<string, string> filter = destinationConfig["Filter"].ToObject<IDictionary<string, string>>();
+            IDictionary<string, JContainer> filter = destinationConfig["Filter"].ToObject<IDictionary<string, JContainer>>();
 
-            string appFilter = filter["App"];
+            IList<string> appsFilter = filter["App"].ToObject<IList<string>>();
             
             foreach (var languageId_file in languageId_files)
             {
@@ -66,7 +66,7 @@ namespace AppLocalizationUtil.Domain.Destination
                     filePath += "/";
                 filePath += fileConfig;
 
-                writers.Add(new AndroidXmlResourceWriter(filePath, languageId, appFilter));
+                writers.Add(new AndroidXmlResourceWriter(filePath, languageId, appsFilter));
             }
 
             return new AndroidDestination(writers);
