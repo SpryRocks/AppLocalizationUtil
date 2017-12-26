@@ -37,7 +37,6 @@ namespace AppLocalizationUtil.Domain.Destination
         private IDestination ChooseAndroid(JObject destinationConfig)
         {
             string path = _destinationPath;
-            
             if (path == null)
                 path = string.Empty;
 
@@ -74,7 +73,30 @@ namespace AppLocalizationUtil.Domain.Destination
 
         private IDestination ChooseWeb(JObject destinationConfig)
         {
-            return new WebDestination();
+            string path = _destinationPath;
+            if (path == null)
+                path = string.Empty;
+
+            string destinationPath = destinationConfig.Value<string>("Path");
+            if (destinationPath != null)
+            {
+                if (!string.IsNullOrEmpty(path))
+                    path += "/";
+                path += destinationPath;
+            }
+
+            string fileConfig = destinationConfig.Value<string>("File");
+
+            string filePath = path;
+            if (!string.IsNullOrEmpty(filePath))
+                filePath += "/";
+            filePath += fileConfig;
+
+            IDictionary<string, JContainer> filter = destinationConfig["Filter"].ToObject<IDictionary<string, JContainer>>();
+            IList<string> appsFilter = filter["App"].ToObject<IList<string>>();
+
+            WebJsonResourceWriter writer = new WebJsonResourceWriter(filePath, languageIdsFilter: null, appsFilter: appsFilter);
+            return new WebDestination(writer);
         }
     }
 }
