@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AppLocalizationUtil.Entities;
@@ -41,6 +42,9 @@ namespace AppLocalizationUtil.Data.Loaders
                 if (workbook != null) 
                 {
                     workbook.Close();
+
+                    // This is temporary bug workarround
+                    BugWorkarround_DeleteTmpFiles();
                 }
             }
         }
@@ -154,6 +158,26 @@ namespace AppLocalizationUtil.Data.Loaders
                 Languages = _configuration.LanguageColumns.Values.ToHashSet(),
                 Platforms = _configuration.PlatformKeyColumns.Values.ToHashSet()
             };
+        }
+
+        private void BugWorkarround_DeleteTmpFiles() 
+        {
+            // There is a bug in DotNetCore.NPOI library (version 1.0.2),
+            // current implementation of XSSFWorkbook.Close() method leaves OpenXml4Net**********.tmp files.
+            // The workarround is manually delete these files until bug will be fixes
+
+            var di = new DirectoryInfo(Environment.CurrentDirectory);
+
+            var tmpFiles = di.GetFiles("OpenXml4Net*.tmp");
+
+            foreach (var tmpFile in tmpFiles) 
+            {
+                try
+                {
+                    tmpFile.Delete();
+                }
+                catch {}
+            }
         }
     }
 }

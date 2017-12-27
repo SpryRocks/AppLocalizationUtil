@@ -27,8 +27,7 @@ namespace AppLocalizationUtil.Data.Sources
                 }
             }
             catch
-            {
-            }
+            {}
         }
 
         public async Task<Document> LoadAsync()
