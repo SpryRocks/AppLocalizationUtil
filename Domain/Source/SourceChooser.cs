@@ -29,7 +29,8 @@ namespace AppLocalizationUtil.Domain.Source
 
             IDictionary<string, Func<JObject, IFileDownloader>> placementTypes = new Dictionary<string, Func<JObject, IFileDownloader>>
             {
-                { "OneDrive", ChooseOneDriveFileDownloader }
+                { "OneDrive", ChooseOneDriveFileDownloader },
+                { "GoogleDrive", ChooseGoogleDriveFileDownloader }
             };
 
             JObject placementConfig = sourceConfig.Value<JObject>("Placement");
@@ -51,6 +52,17 @@ namespace AppLocalizationUtil.Domain.Source
             string tmpFileName = $"{Environment.CurrentDirectory}/wrk.xlsx";
 
             return new OneDriveFileDownloader(resId, authKey, tmpFileName);
+        }
+
+        private IFileDownloader ChooseGoogleDriveFileDownloader(JObject placementConfig)
+        {
+            var config = placementConfig["Config"];
+
+            var id = config.Value<string>("Id");
+
+            string tmpFileName = $"{Environment.CurrentDirectory}/wrk.xlsx";
+
+            return new GoogleDriveFileDownloader(id, tmpFileName);
         }
     }
 }
