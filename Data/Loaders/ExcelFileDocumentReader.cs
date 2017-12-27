@@ -30,9 +30,24 @@ namespace AppLocalizationUtil.Data.Loaders
         {
             Console.WriteLine($"Read excel document... [{FileName}]");
 
-            List<Group> groups = new List<Group>();
+            IWorkbook workbook = null;
+            try 
+            {
+                workbook = new XSSFWorkbook(FileName);
+                return ReadWorkbook(workbook);
+            }
+            finally
+            {
+                if (workbook != null) 
+                {
+                    workbook.Close();
+                }
+            }
+        }
 
-            IWorkbook workbook = new XSSFWorkbook(FileName);
+        private Document ReadWorkbook(IWorkbook workbook)
+        {
+            List<Group> groups = new List<Group>();
 
             var numberOfSheets = workbook.NumberOfSheets;
 

@@ -16,6 +16,21 @@ namespace AppLocalizationUtil.Data.Sources
             _documentReader = documentReader;
         }
 
+        public void Dispose()
+        {
+            try
+            {
+                FileInfo fi = new FileInfo(_fileDownloader.FileName);
+                if (fi.Exists)
+                {
+                    fi.Delete();
+                }
+            }
+            catch
+            {
+            }
+        }
+
         public async Task<Document> LoadAsync()
         {
             await _fileDownloader.DownloadAsync();
