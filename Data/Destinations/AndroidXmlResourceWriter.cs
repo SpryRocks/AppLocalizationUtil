@@ -93,10 +93,10 @@ namespace AppLocalizationUtil.Data.Destinations
             
             if (value.StartsWith("?"))
             {
-                value = "/" + value;
+                value = "\\" + value;
             }
 
-            value = value.Replace("'", "\'");
+            value = value.Replace("'", "\\\'");
 
             return value;
         }
