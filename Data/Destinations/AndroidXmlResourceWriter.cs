@@ -96,7 +96,9 @@ namespace AppLocalizationUtil.Data.Destinations
                 value = "\\" + value;
             }
 
-            value = value.Replace("'", "\\\'");
+            value = value
+                .Replace("'", "\\\'")
+                .Replace("\n", "\\n");
 
             return value;
         }
