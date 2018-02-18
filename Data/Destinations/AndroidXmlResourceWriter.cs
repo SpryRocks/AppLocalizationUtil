@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -41,7 +42,7 @@ namespace AppLocalizationUtil.Data.Destinations
 
                 foreach (var item in group.Items) 
                 {
-                    bool isFilterCheckPassed = 
+                    var isFilterCheckPassed = 
                         ApplyAppFilter(item, _appsFilter) && 
                         ApplyAndroidPlatformFilter(item) &&
                         ApplyLanguageFilter(item, language);
@@ -69,15 +70,15 @@ namespace AppLocalizationUtil.Data.Destinations
                 {
                     var key = item.Keys[Platforms.Android];
                     var value = item.Values[language];
-                    
-                    var xStringt = new XElement("string", new XAttribute("name", key));
-                    xStringt.Value = PrepareValue(value);
+
+                    var xStringt = new XElement("string", new XAttribute("name", key)) {Value = PrepareValue(value)};
                     xResources.Add(xStringt);
                 }
             }
 
-            FileInfo fi = new FileInfo(_fileName);
-            DirectoryInfo di = fi.Directory;
+            var fi = new FileInfo(_fileName);
+            var di = fi.Directory;
+            Debug.Assert(di != null, nameof(di) + " != null");
             if (!di.Exists)
                 di.Create();
 
@@ -96,7 +97,9 @@ namespace AppLocalizationUtil.Data.Destinations
                 value = "\\" + value;
             }
 
-            value = value.Replace("'", "\\\'");
+            value = value
+                .Replace("'", "\\\'")
+                .Replace("\n", "\\n");
 
             return value;
         }
