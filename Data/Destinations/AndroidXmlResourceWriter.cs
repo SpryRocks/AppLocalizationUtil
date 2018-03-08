@@ -99,7 +99,8 @@ namespace AppLocalizationUtil.Data.Destinations
 
             value = value
                 .Replace("'", "\\\'")
-                .Replace("\n", "\\n");
+                .Replace("\n", "\\n")
+                .Replace("...", "…");
 
             return value;
         }
