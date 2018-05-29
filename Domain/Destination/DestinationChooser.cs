@@ -25,7 +25,8 @@ namespace AppLocalizationUtil.Domain.Destination
             IDictionary<string, Func<JObject, IDestination>> destinations = new Dictionary<string, Func<JObject, IDestination>>
             {
                 { Platforms.Android, ChooseAndroid },
-                { Platforms.Web, ChooseWeb }
+                { Platforms.Web, ChooseWeb },
+                { Platforms.IOS, ChooseIOS }
             };
 
             string type = destinationConfig.Value<string>("Type");
@@ -97,6 +98,43 @@ namespace AppLocalizationUtil.Domain.Destination
 
             WebJsonResourceWriter writer = new WebJsonResourceWriter(filePath, languageIdsFilter: null, appsFilter: appsFilter);
             return new WebDestination(writer);
+        }
+        
+        private IDestination ChooseIOS(JObject destinationConfig)
+        {
+            string path = _destinationPath;
+            if (path == null)
+                path = string.Empty;
+
+            string destinationPath = destinationConfig.Value<string>("Path");
+            if (destinationPath != null)
+            {
+                if (!string.IsNullOrEmpty(path))
+                    path += "/";
+                path += destinationPath;
+            }
+
+            IList<IOSStringsResourceWriter> writers = new List<IOSStringsResourceWriter>();
+
+            IDictionary<string, string> languageId_files = destinationConfig["Files"].ToObject<IDictionary<string, string>>();
+            IDictionary<string, JContainer> filter = destinationConfig["Filter"].ToObject<IDictionary<string, JContainer>>();
+
+            IList<string> appsFilter = filter["App"].ToObject<IList<string>>();
+            
+            foreach (var languageId_file in languageId_files)
+            {
+                string languageId = languageId_file.Key;
+                string fileConfig = languageId_file.Value;
+
+                string filePath = path;
+                if (!string.IsNullOrEmpty(filePath))
+                    filePath += "/";
+                filePath += fileConfig;
+
+                writers.Add(new IOSStringsResourceWriter(filePath, languageId, appsFilter));
+            }
+
+            return new IOSDestination(writers);
         }
     }
 }
