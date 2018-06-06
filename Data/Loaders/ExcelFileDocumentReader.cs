@@ -134,7 +134,7 @@ namespace AppLocalizationUtil.Data.Loaders
 
                         if (col_apps == columnIndex)
                         {
-                             apps = value.Split(",").Select(it => it.Trim()).ToHashSet();
+                             apps = value.Split(new[] {",", ";"}, StringSplitOptions.RemoveEmptyEntries).Select(it => it.Trim()).ToHashSet();
 
                              continue;
                         }
