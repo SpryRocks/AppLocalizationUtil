@@ -4,9 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 using AppLocalizationUtil.Entities;
 
 namespace AppLocalizationUtil.Data.Destinations
@@ -75,7 +73,7 @@ namespace AppLocalizationUtil.Data.Destinations
                         var key = item.Keys[Platforms.IOS];
                         var value = item.Values[language];
 
-                        await sr.WriteLineAsync($"\"{key}\" = \"{PrepareValue(value)}\"");
+                        await sr.WriteLineAsync($"\"{key}\" = \"{PrepareValue(value)}\";");
                     }
 
                     await sr.WriteLineAsync();
