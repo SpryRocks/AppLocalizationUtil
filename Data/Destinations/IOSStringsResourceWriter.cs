@@ -86,17 +86,8 @@ namespace AppLocalizationUtil.Data.Destinations
         {
             value = value.Trim();
             
-            /*
-            if (value.StartsWith("?"))
-            {
-                value = "\\" + value;
-            }
-
             value = value
-                .Replace("'", "\\\'")
-                .Replace("\n", "\\n")
-                .Replace("...", "…");
-            */
+                .Replace("\"", "\\\"");
 
             return value;
         }
