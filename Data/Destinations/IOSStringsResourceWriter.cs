@@ -85,9 +85,10 @@ namespace AppLocalizationUtil.Data.Destinations
         private string PrepareValue(string value)
         {
             value = value.Trim();
-            
+
             value = value
-                .Replace("\"", "\\\"");
+                .Replace("\"", "\\\"")
+                .Replace("%s", "%@");
 
             return value;
         }
