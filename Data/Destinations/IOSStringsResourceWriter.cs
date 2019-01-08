@@ -87,8 +87,22 @@ namespace AppLocalizationUtil.Data.Destinations
             value = value.Trim();
 
             value = value
-                .Replace("\"", "\\\"")
-                .Replace("%s", "%@");
+                .Replace("\"", "\\\"");
+
+            value = PrepareValueFormats(value, "s", "@");
+            
+            return value;
+        }
+
+        private string PrepareValueFormats(string value, string sourceType, string destinationType)
+        {            
+            value = value
+                .Replace($"%{sourceType}", $"%{destinationType}");
+
+            for (var i = 1; i <= 9; i++)
+            {
+                value = value.Replace($"%{i}${sourceType}", $"%{i}${destinationType}");
+            }
 
             return value;
         }
