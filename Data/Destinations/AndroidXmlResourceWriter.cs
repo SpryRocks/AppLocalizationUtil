@@ -101,6 +101,8 @@ namespace AppLocalizationUtil.Data.Destinations
                 .Replace("'", "\\\'")
                 .Replace("\n", "\\n")
                 .Replace("...", "…");
+          
+            value = DestinationValueFormatUtils.PrepareValueFormats(value, "s", "s", 1);
 
             return value;
         }
