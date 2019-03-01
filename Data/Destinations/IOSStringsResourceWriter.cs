@@ -89,7 +89,7 @@ namespace AppLocalizationUtil.Data.Destinations
             value = value
                 .Replace("\"", "\\\"");
 
-            value = DestinationValueFormatUtils.PrepareValueFormats(value, "s", "s", 1);
+            value = DestinationValueFormatUtils.PrepareValueFormats(value, "s", "@", 1);
             
             return value;
         }
