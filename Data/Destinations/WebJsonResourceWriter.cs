@@ -102,6 +102,7 @@ namespace AppLocalizationUtil.Data.Destinations
             using (JsonWriter writer = new JsonTextWriter(sw) { Formatting = Formatting.Indented })
             {
                 await jDocument.WriteToAsync(writer);
+                await sw.WriteLineAsync();
             }
         }
 
