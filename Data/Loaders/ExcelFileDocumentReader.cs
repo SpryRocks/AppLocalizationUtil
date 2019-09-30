@@ -12,7 +12,6 @@ namespace AppLocalizationUtil.Data.Loaders
 {
     public class ExcelFileDocumentReader : IFileDocumentReader
     {
-
         public string FileName { get; set; }
 
         private readonly ExcelConfiguration _configuration;
@@ -32,14 +31,14 @@ namespace AppLocalizationUtil.Data.Loaders
             Console.WriteLine($"Read excel document... [{FileName}]");
 
             IWorkbook workbook = null;
-            try 
+            try
             {
                 workbook = new XSSFWorkbook(FileName);
                 return ReadWorkbook(workbook);
             }
             finally
             {
-                if (workbook != null) 
+                if (workbook != null)
                 {
                     workbook.Close();
 
@@ -60,15 +59,15 @@ namespace AppLocalizationUtil.Data.Loaders
                 var sheet = workbook.GetSheetAt(i);
 
                 var items = ReadSheet(sheet);
-                if (items == null) 
+                if (items == null)
                     continue;
 
-                groups.Add(new Group { Name = sheet.SheetName, Items = items });
+                groups.Add(new Group {Name = sheet.SheetName, Items = items});
             }
 
             return new Document
             {
-                Groups = groups, 
+                Groups = groups,
                 Languages = _configuration.LanguageColumns.Values.ToHashSet(),
                 Platforms = _configuration.PlatformKeyColumns.Values.ToHashSet()
             };
@@ -170,7 +169,7 @@ namespace AppLocalizationUtil.Data.Loaders
             return items;
         }
 
-        private void BugWorkarround_DeleteTmpFiles() 
+        private void BugWorkarround_DeleteTmpFiles()
         {
             // There is a bug in DotNetCore.NPOI library (version 1.0.2),
             // current implementation of XSSFWorkbook.Close() method leaves OpenXml4Net**********.tmp files.
@@ -180,13 +179,15 @@ namespace AppLocalizationUtil.Data.Loaders
 
             var tmpFiles = di.GetFiles("OpenXml4Net*.tmp");
 
-            foreach (var tmpFile in tmpFiles) 
+            foreach (var tmpFile in tmpFiles)
             {
                 try
                 {
                     tmpFile.Delete();
                 }
-                catch {}
+                catch
+                {
+                }
             }
         }
     }
