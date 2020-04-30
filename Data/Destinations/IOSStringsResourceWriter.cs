@@ -3,20 +3,19 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading;
+using System.Text;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 using AppLocalizationUtil.Entities;
 
 namespace AppLocalizationUtil.Data.Destinations
 {
-    public class AndroidXmlResourceWriter
+    public class IOSStringsResourceWriter
     {
         private readonly string _fileName;
         private readonly string _languageId;
         private readonly IList<string> _appsFilter;
 
-        public AndroidXmlResourceWriter(string fileName, string languageId, IList<string> appsFilter)
+        public IOSStringsResourceWriter(string fileName, string languageId, IList<string> appsFilter)
         {
             _fileName = fileName;
             _languageId = languageId;
@@ -25,15 +24,10 @@ namespace AppLocalizationUtil.Data.Destinations
 
         public async Task WriteAsync(Document document)
         {
-            Console.WriteLine($"Write Android resource .xml file... [{_fileName}]");
+            Console.WriteLine($"Write iOS resource .strings file... [{_fileName}]");
 
             var language = document.Languages.Single(l => l.Id == _languageId);
             
-            var xDocument = new XDocument();
-            var xResources = new XElement("resources");
-
-            xDocument.Add(xResources);
-
             IDictionary<Group, IList<LocalizationItem>> filteredGroups = new Dictionary<Group, IList<LocalizationItem>>();
 
             foreach (var group in document.Groups) 
@@ -44,7 +38,7 @@ namespace AppLocalizationUtil.Data.Destinations
                 {
                     var isFilterCheckPassed = 
                         ApplyAppFilter(item, _appsFilter) && 
-                        ApplyAndroidPlatformFilter(item) &&
+                        ApplyIOSPlatformFilter(item) &&
                         ApplyLanguageFilter(item, language);
                     
                     if (isFilterCheckPassed)
@@ -59,51 +53,44 @@ namespace AppLocalizationUtil.Data.Destinations
                 }
             }
 
-            foreach (var filteredGroup in filteredGroups)
-            {
-                var group = filteredGroup.Key;
-                var items = filteredGroup.Value;
-                
-                xResources.Add(new XComment($" {group.Name} "));
-
-                foreach (var item in items)
-                {
-                    var key = item.Keys[Platforms.Android];
-                    var value = item.Values[language];
-
-                    var xStringt = new XElement("string", new XAttribute("name", key)) {Value = PrepareValue(value)};
-                    xResources.Add(xStringt);
-                }
-            }
-
             var fi = new FileInfo(_fileName);
             var di = fi.Directory;
             Debug.Assert(di != null, nameof(di) + " != null");
             if (!di.Exists)
                 di.Create();
 
-            using(var file = new FileStream(fi.FullName, FileMode.Create))
-            {
-                await xDocument.SaveAsync(file, SaveOptions.None, CancellationToken.None);
+            using (var sr = new StreamWriter(_fileName, false, Encoding.UTF8))
+            {             
+                foreach (var filteredGroup in filteredGroups)
+                {
+                    var group = filteredGroup.Key;
+                    var items = filteredGroup.Value;
+
+                    await sr.WriteLineAsync($"// {group.Name}");
+
+                    foreach (var item in items)
+                    {
+                        var key = item.Keys[Platforms.IOS];
+                        var value = item.Values[language];
+
+                        await sr.WriteLineAsync($"\"{key}\" = \"{PrepareValue(value)}\";");
+                    }
+
+                    await sr.WriteLineAsync();
+                }
+
             }
         }
 
         private string PrepareValue(string value)
         {
             value = value.Trim();
-            
-            if (value.StartsWith("?"))
-            {
-                value = "\\" + value;
-            }
 
             value = value
-                .Replace("'", "\\\'")
-                .Replace("\n", "\\n")
-                .Replace("...", "…");
-          
-            value = DestinationValueFormatUtils.PrepareValueFormats(value, "s", "s", 1);
+                .Replace("\"", "\\\"");
 
+            value = DestinationValueFormatUtils.PrepareValueFormats(value, "s", "@", 1);
+            
             return value;
         }
 
@@ -126,9 +113,9 @@ namespace AppLocalizationUtil.Data.Destinations
             return false;
         }
 
-        private bool ApplyAndroidPlatformFilter(LocalizationItem item)
+        private bool ApplyIOSPlatformFilter(LocalizationItem item)
         {
-            return item.Keys.ContainsKey(Platforms.Android);
+            return item.Keys.ContainsKey(Platforms.IOS);
         }
 
         private bool ApplyLanguageFilter(LocalizationItem item, Language language)
