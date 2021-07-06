@@ -8,4 +8,16 @@
     <PackageReference Include="DotNetCore.NPOI" Version="1.2.2" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="System.Resources.NetStandard\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Remove="System.Resources.NetStandard\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="System.Resources.NetStandard\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="System.Resources.NetStandard\System.Resources.NetStandard.csproj" />
+  </ItemGroup>
 </Project>

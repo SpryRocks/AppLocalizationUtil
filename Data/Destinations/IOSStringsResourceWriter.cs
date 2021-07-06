@@ -11,22 +11,18 @@ namespace AppLocalizationUtil.Data.Destinations
 {
     public class IOSStringsResourceWriter
     {
-        private readonly string _fileName;
-        private readonly string _languageId;
-        private readonly IList<string> _appsFilter;
+       private readonly DestinationResourceWriterConfigSingleLanguage _writerConfig;
 
-        public IOSStringsResourceWriter(string fileName, string languageId, IList<string> appsFilter)
+        public IOSStringsResourceWriter(DestinationResourceWriterConfigSingleLanguage writerConfig)
         {
-            _fileName = fileName;
-            _languageId = languageId;
-            _appsFilter = appsFilter;
+            _writerConfig = writerConfig;
         }
 
         public async Task WriteAsync(Document document)
         {
-            Console.WriteLine($"Write iOS resource .strings file... [{_fileName}]");
+            Console.WriteLine($"Write iOS resource .strings file... [{_writerConfig.FileName}]");
 
-            var language = document.Languages.Single(l => l.Id == _languageId);
+            var language = document.Languages.Single(l => l.Id == _writerConfig.LanguageId);
             
             IDictionary<Group, IList<LocalizationItem>> filteredGroups = new Dictionary<Group, IList<LocalizationItem>>();
 
@@ -37,7 +33,7 @@ namespace AppLocalizationUtil.Data.Destinations
                 foreach (var item in group.Items) 
                 {
                     var isFilterCheckPassed = 
-                        ApplyAppFilter(item, _appsFilter) && 
+                        ApplyAppFilter(item, _writerConfig.AppsFilter) && 
                         ApplyIOSPlatformFilter(item) &&
                         ApplyLanguageFilter(item, language);
                     
@@ -53,13 +49,13 @@ namespace AppLocalizationUtil.Data.Destinations
                 }
             }
 
-            var fi = new FileInfo(_fileName);
+            var fi = new FileInfo(_writerConfig.FileName);
             var di = fi.Directory;
             Debug.Assert(di != null, nameof(di) + " != null");
             if (!di.Exists)
                 di.Create();
 
-            using (var sr = new StreamWriter(_fileName, false, Encoding.UTF8))
+            using (var sr = new StreamWriter(_writerConfig.FileName, false, Encoding.UTF8))
             {             
                 foreach (var filteredGroup in filteredGroups)
                 {

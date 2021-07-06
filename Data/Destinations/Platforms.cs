@@ -5,5 +5,6 @@ namespace AppLocalizationUtil.Data.Destinations
         public const string Android = "Android";
         public const string Web = "Web";
         public const string IOS = "iOS";
+        public const string DotNet = "DotNet";
     }
 }

@@ -19,21 +19,21 @@ namespace AppLocalizationUtil.Presentation
 
             Console.WriteLine($"Current directory: {Environment.CurrentDirectory}");
             
-            IConfigurationReader configurationReader = new ConfigurationReader(configFileName);
+            var configurationReader = ConfigurationReader.Create(configFileName);
             Console.WriteLine("[Configuration]");
             var configuration = await configurationReader.ReadAsync();
 
             Document document;
 
-            ISourceChooser sourceChooser = new SourceChooser();
+            var sourceChooser = SourceChooser.Create();
             Console.WriteLine("[Source]");
-            using (ISource source = sourceChooser.Choose(configuration.Source))
+            using (var source = sourceChooser.Choose(configuration.Source))
             {
                 document = await source.LoadAsync();
             }
 
-            IDestinationChooser destinationChooser = new DestinationChooser(configuration.DestinationPath);
-            IList<IDestination> destinations = destinationChooser.Choose(configuration.Destinations);
+            var destinationChooser = DestinationChooser.Create(configuration.DestinationPath);
+            var destinations = destinationChooser.Choose(configuration.Destinations);
 
             Console.WriteLine("[Destination]");
             foreach (var destination in destinations)

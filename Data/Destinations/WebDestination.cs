@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using AppLocalizationUtil.Entities;
 
@@ -5,16 +6,17 @@ namespace AppLocalizationUtil.Data.Destinations
 {
     public class WebDestination : IDestination
     {
-        private readonly WebJsonResourceWriter _writer;
+        private readonly DestinationResourceWriterConfigMultiLanguage _config;
 
-        public WebDestination(WebJsonResourceWriter writer)
+        public WebDestination(DestinationResourceWriterConfigMultiLanguage config)
         {
-            _writer = writer;
+            _config = config;
         }
 
         public async Task WriteAsync(Document document)
         {
-            await _writer.WriteAsync(document);
+            var writer = new WebJsonResourceWriter(_config);
+            await writer.WriteAsync(document);
         }
     }
 }

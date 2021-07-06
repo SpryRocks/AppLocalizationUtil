@@ -1,8 +1,10 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Resources.NetStandard;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -10,25 +12,31 @@ using AppLocalizationUtil.Entities;
 
 namespace AppLocalizationUtil.Data.Destinations
 {
-    public class AndroidXmlResourceWriter
+    public class DotNetResxResourceWriter
     {
         private readonly DestinationResourceWriterConfigSingleLanguage _writerConfig;
 
-        public AndroidXmlResourceWriter(DestinationResourceWriterConfigSingleLanguage writerConfig)
+        public DotNetResxResourceWriter(DestinationResourceWriterConfigSingleLanguage writerConfig)
         {
             _writerConfig = writerConfig;
         }
 
-        public async Task WriteAsync(Document document)
+        public Task WriteAsync(Document document)
         {
-            Console.WriteLine($"Write Android resource .xml file... [{_writerConfig.FileName}]");
+            return Task.Run(() => WriteInternal(document));
+        }
+        
+        private void WriteInternal(Document document)
+        {
+            Console.WriteLine($"Write .Net resource .resx file... [{_writerConfig.FileName}]");
 
             var language = document.Languages.Single(l => l.Id == _writerConfig.LanguageId);
-            
-            var xDocument = new XDocument();
-            var xResources = new XElement("resources");
 
-            xDocument.Add(xResources);
+            var writer = new ResXResourceWriter(_writerConfig.FileName)
+            {
+                CustomReaderValue = "System.Resources.ResXResourceReader, System.Windows.Forms, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
+                CustomWriterValue = "System.Resources.ResXResourceWriter, System.Windows.Forms, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+            };
 
             IDictionary<Group, IList<LocalizationItem>> filteredGroups = new Dictionary<Group, IList<LocalizationItem>>();
 
@@ -40,7 +48,7 @@ namespace AppLocalizationUtil.Data.Destinations
                 {
                     var isFilterCheckPassed = 
                         ApplyAppFilter(item, _writerConfig.AppsFilter) && 
-                        ApplyAndroidPlatformFilter(item) &&
+                        ApplyDotNetPlatformFilter(item) &&
                         ApplyLanguageFilter(item, language);
                     
                     if (isFilterCheckPassed)
@@ -60,15 +68,14 @@ namespace AppLocalizationUtil.Data.Destinations
                 var group = filteredGroup.Key;
                 var items = filteredGroup.Value;
                 
-                xResources.Add(new XComment($" {group.Name} "));
+                //xResources.Add(new XComment($" {group.Name} "));
 
                 foreach (var item in items)
                 {
-                    var key = item.Keys[Platforms.Android];
+                    var key = item.Keys[Platforms.DotNet];
                     var value = item.Values[language];
 
-                    var xStringt = new XElement("string", new XAttribute("name", key)) {Value = PrepareValue(value)};
-                    xResources.Add(xStringt);
+                    writer.AddResource(key, PrepareValue( value));
                 }
             }
 
@@ -77,32 +84,10 @@ namespace AppLocalizationUtil.Data.Destinations
             Debug.Assert(di != null, nameof(di) + " != null");
             if (!di.Exists)
                 di.Create();
-
-            using(var file = new FileStream(fi.FullName, FileMode.Create))
-            {
-                await xDocument.SaveAsync(file, SaveOptions.None, CancellationToken.None);
-            }
-        }
-
-        private string PrepareValue(string value)
-        {
-            value = value.Trim();
             
-            if (value.StartsWith("?"))
-            {
-                value = "\\" + value;
-            }
-
-            value = value
-                .Replace("'", "\\\'")
-                .Replace("\n", "\\n")
-                .Replace("...", "…");
-          
-            value = DestinationValueFormatUtils.PrepareValueFormats(value, "s", "s", 1);
-
-            return value;
+            writer.Close();
         }
-
+        
         private bool ApplyAppFilter(LocalizationItem item, IList<string> appsFilter) 
         {
             foreach (var appFilter in appsFilter)
@@ -121,15 +106,34 @@ namespace AppLocalizationUtil.Data.Destinations
 
             return false;
         }
-
-        private bool ApplyAndroidPlatformFilter(LocalizationItem item)
+        
+        private bool ApplyDotNetPlatformFilter(LocalizationItem item)
         {
-            return item.Keys.ContainsKey(Platforms.Android);
+            return item.Keys.ContainsKey(Platforms.DotNet);
         }
 
         private bool ApplyLanguageFilter(LocalizationItem item, Language language)
         {
             return item.Values.ContainsKey(language);
+        }
+        
+        private string PrepareValue(string value)
+        {
+            value = value.Trim();
+            
+            // if (value.StartsWith("?"))
+            // {
+            //     value = "\\" + value;
+            // }
+            //
+            // value = value
+            //     .Replace("'", "\\\'")
+            //     .Replace("\n", "\\n")
+            //     .Replace("...", "…");
+            //
+            // value = DestinationValueFormatUtils.PrepareValueFormats(value, "s", "s", 1);
+
+            return value;
         }
     }
 }

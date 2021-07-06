@@ -7,9 +7,14 @@ namespace AppLocalizationUtil.Data.Configuration
 {
     public class ConfigurationReader : IConfigurationReader
     {
+        public static IConfigurationReader Create(string filename)
+        {
+            return new ConfigurationReader(filename);
+        }
+        
         public string FileName { get; set; }
 
-        public ConfigurationReader(string fileName) 
+        private ConfigurationReader(string fileName) 
         {
             FileName = fileName;
         }

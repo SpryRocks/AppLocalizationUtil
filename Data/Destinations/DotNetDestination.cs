@@ -1,14 +1,14 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using AppLocalizationUtil.Entities;
 
 namespace AppLocalizationUtil.Data.Destinations
 {
-    public class AndroidDestination : IDestination
+    public class DotNetDestination:IDestination
     {
         private readonly IList<DestinationResourceWriterConfigSingleLanguage> _config;
 
-        public AndroidDestination(IList<DestinationResourceWriterConfigSingleLanguage> config)
+        public DotNetDestination(IList<DestinationResourceWriterConfigSingleLanguage> config)
         {
             _config = config;
         }
@@ -17,7 +17,7 @@ namespace AppLocalizationUtil.Data.Destinations
         {
             foreach (var config in _config)
             {
-                var writer = new AndroidXmlResourceWriter(config);
+                var writer = new DotNetResxResourceWriter(config);
                 await writer.WriteAsync(document);
             }
         }
