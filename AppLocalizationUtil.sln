@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppLocalizationUtil", "AppLocalizationUtil.csproj", "{3667B9F0-ED35-4F29-9D81-1725BA6FB5FA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Resources.NetStandard", "System.Resources.NetStandard\System.Resources.NetStandard.csproj", "{398F7DAB-D6AB-44DA-852B-1826AB54E287}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{3667B9F0-ED35-4F29-9D81-1725BA6FB5FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3667B9F0-ED35-4F29-9D81-1725BA6FB5FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3667B9F0-ED35-4F29-9D81-1725BA6FB5FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{398F7DAB-D6AB-44DA-852B-1826AB54E287}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{398F7DAB-D6AB-44DA-852B-1826AB54E287}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{398F7DAB-D6AB-44DA-852B-1826AB54E287}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{398F7DAB-D6AB-44DA-852B-1826AB54E287}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -6,17 +6,18 @@ namespace AppLocalizationUtil.Data.Destinations
 {
     public class IOSDestination : IDestination
     {
-        private readonly IList<IOSStringsResourceWriter> _writers;
+        private readonly IList<DestinationResourceWriterConfigSingleLanguage> _config;
 
-        public IOSDestination(IList<IOSStringsResourceWriter> writers)
+        public IOSDestination(IList<DestinationResourceWriterConfigSingleLanguage> config)
         {
-            _writers = writers;
+            _config = config;
         }
 
         public async Task WriteAsync(Document document)
         {
-            foreach (var writer in _writers)
+            foreach (var config in _config)
             {
+                var writer = new IOSStringsResourceWriter(config);
                 await writer.WriteAsync(document);
             }
         }

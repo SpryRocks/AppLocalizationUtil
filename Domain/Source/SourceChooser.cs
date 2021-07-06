@@ -9,6 +9,13 @@ namespace AppLocalizationUtil.Domain.Source
 {
     public class SourceChooser : ISourceChooser
     {
+        public static ISourceChooser Create()
+        {
+            return new SourceChooser();
+        }
+        
+        private SourceChooser() {}
+
         public ISource Choose(JObject sourceConfig)
         {
             IDictionary<string, Func<JObject, ISource>> types = new Dictionary<string, Func<JObject, ISource>>

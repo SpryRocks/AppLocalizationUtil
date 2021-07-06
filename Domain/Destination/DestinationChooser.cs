@@ -8,9 +8,14 @@ namespace AppLocalizationUtil.Domain.Destination
 {
     public class DestinationChooser : IDestinationChooser
     {
+        public static IDestinationChooser Create(string destinationPath)
+        {
+            return new DestinationChooser(destinationPath);
+        }
+
         private readonly string _destinationPath;
 
-        public DestinationChooser(string destinationPath)
+        private DestinationChooser(string destinationPath)
         {
             _destinationPath = destinationPath;
         }
@@ -22,12 +27,14 @@ namespace AppLocalizationUtil.Domain.Destination
 
         private IDestination Choose(JObject destinationConfig)
         {
-            IDictionary<string, Func<JObject, IDestination>> destinations = new Dictionary<string, Func<JObject, IDestination>>
-            {
-                { Platforms.Android, ChooseAndroid },
-                { Platforms.Web, ChooseWeb },
-                { Platforms.IOS, ChooseIOS }
-            };
+            IDictionary<string, Func<JObject, IDestination>> destinations =
+                new Dictionary<string, Func<JObject, IDestination>>
+                {
+                    {Platforms.Android, ChooseAndroid},
+                    {Platforms.Web, ChooseWeb},
+                    {Platforms.IOS, ChooseIOS},
+                    {Platforms.DotNet, ChooseDotNet},
+                };
 
             string type = destinationConfig.Value<string>("Type");
             if (!destinations.ContainsKey(type))
@@ -49,13 +56,16 @@ namespace AppLocalizationUtil.Domain.Destination
                 path += destinationPath;
             }
 
-            IList<AndroidXmlResourceWriter> writers = new List<AndroidXmlResourceWriter>();
+            IList<DestinationResourceWriterConfigSingleLanguage> config =
+                new List<DestinationResourceWriterConfigSingleLanguage>();
 
-            IDictionary<string, string> languageId_files = destinationConfig["Files"].ToObject<IDictionary<string, string>>();
-            IDictionary<string, JContainer> filter = destinationConfig["Filter"].ToObject<IDictionary<string, JContainer>>();
+            IDictionary<string, string> languageId_files =
+                destinationConfig["Files"].ToObject<IDictionary<string, string>>();
+            IDictionary<string, JContainer> filter =
+                destinationConfig["Filter"].ToObject<IDictionary<string, JContainer>>();
 
             IList<string> appsFilter = filter["App"].ToObject<IList<string>>();
-            
+
             foreach (var languageId_file in languageId_files)
             {
                 string languageId = languageId_file.Key;
@@ -66,10 +76,10 @@ namespace AppLocalizationUtil.Domain.Destination
                     filePath += "/";
                 filePath += fileConfig;
 
-                writers.Add(new AndroidXmlResourceWriter(filePath, languageId, appsFilter));
+                config.Add(new DestinationResourceWriterConfigSingleLanguage(filePath, languageId, appsFilter));
             }
 
-            return new AndroidDestination(writers);
+            return new AndroidDestination(config);
         }
 
         private IDestination ChooseWeb(JObject destinationConfig)
@@ -93,13 +103,16 @@ namespace AppLocalizationUtil.Domain.Destination
                 filePath += "/";
             filePath += fileConfig;
 
-            IDictionary<string, JContainer> filter = destinationConfig["Filter"].ToObject<IDictionary<string, JContainer>>();
+            IDictionary<string, JContainer> filter =
+                destinationConfig["Filter"].ToObject<IDictionary<string, JContainer>>();
             IList<string> appsFilter = filter["App"].ToObject<IList<string>>();
 
-            WebJsonResourceWriter writer = new WebJsonResourceWriter(filePath, languageIdsFilter: null, appsFilter: appsFilter);
-            return new WebDestination(writer);
+            var config =
+                new DestinationResourceWriterConfigMultiLanguage(filePath, languageIdsFilter: null,
+                    appsFilter: appsFilter);
+            return new WebDestination(config);
         }
-        
+
         private IDestination ChooseIOS(JObject destinationConfig)
         {
             string path = _destinationPath;
@@ -114,13 +127,16 @@ namespace AppLocalizationUtil.Domain.Destination
                 path += destinationPath;
             }
 
-            IList<IOSStringsResourceWriter> writers = new List<IOSStringsResourceWriter>();
+            IList<DestinationResourceWriterConfigSingleLanguage> config =
+                new List<DestinationResourceWriterConfigSingleLanguage>();
 
-            IDictionary<string, string> languageId_files = destinationConfig["Files"].ToObject<IDictionary<string, string>>();
-            IDictionary<string, JContainer> filter = destinationConfig["Filter"].ToObject<IDictionary<string, JContainer>>();
+            IDictionary<string, string> languageId_files =
+                destinationConfig["Files"].ToObject<IDictionary<string, string>>();
+            IDictionary<string, JContainer> filter =
+                destinationConfig["Filter"].ToObject<IDictionary<string, JContainer>>();
 
             IList<string> appsFilter = filter["App"].ToObject<IList<string>>();
-            
+
             foreach (var languageId_file in languageId_files)
             {
                 string languageId = languageId_file.Key;
@@ -131,10 +147,50 @@ namespace AppLocalizationUtil.Domain.Destination
                     filePath += "/";
                 filePath += fileConfig;
 
-                writers.Add(new IOSStringsResourceWriter(filePath, languageId, appsFilter));
+                config.Add(new DestinationResourceWriterConfigSingleLanguage(filePath, languageId, appsFilter));
             }
 
-            return new IOSDestination(writers);
+            return new IOSDestination(config);
+        }
+
+        private IDestination ChooseDotNet(JObject destinationConfig)
+        {
+            string path = _destinationPath;
+            if (path == null)
+                path = string.Empty;
+
+            string destinationPath = destinationConfig.Value<string>("Path");
+            if (destinationPath != null)
+            {
+                if (!string.IsNullOrEmpty(path))
+                    path += "/";
+                path += destinationPath;
+            }
+
+            IList<DestinationResourceWriterConfigSingleLanguage> writers =
+                new List<DestinationResourceWriterConfigSingleLanguage>();
+
+            IDictionary<string, string> languageId_files =
+                destinationConfig["Files"].ToObject<IDictionary<string, string>>();
+            IDictionary<string, JContainer> filter =
+                destinationConfig["Filter"].ToObject<IDictionary<string, JContainer>>();
+
+            IList<string> appsFilter = filter["App"].ToObject<IList<string>>();
+
+            foreach (var languageId_file in languageId_files)
+            {
+                string languageId = languageId_file.Key;
+                string fileConfig = languageId_file.Value;
+
+                string filePath = path;
+                if (!string.IsNullOrEmpty(filePath))
+                    filePath += "/";
+                filePath += fileConfig;
+
+                writers.Add(new DestinationResourceWriterConfigSingleLanguage(filePath, languageId, appsFilter));
+            }
+
+            return new DotNetDestination(writers);
         }
     }
 }
