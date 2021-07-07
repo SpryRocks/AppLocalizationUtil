@@ -3,11 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Resources.NetStandard;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 using AppLocalizationUtil.Entities;
 
 namespace AppLocalizationUtil.Data.Destinations
@@ -32,60 +29,79 @@ namespace AppLocalizationUtil.Data.Destinations
 
             var language = document.Languages.Single(l => l.Id == _writerConfig.LanguageId);
 
-            var writer = new ResXResourceWriter(_writerConfig.FileName)
+            using (var writer = new ResXResourceWriter(_writerConfig.FileName)
             {
-                CustomReaderValue = "System.Resources.ResXResourceReader, System.Windows.Forms, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
-                CustomWriterValue = "System.Resources.ResXResourceWriter, System.Windows.Forms, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
-            };
-
-            IDictionary<Group, IList<LocalizationItem>> filteredGroups = new Dictionary<Group, IList<LocalizationItem>>();
-
-            foreach (var group in document.Groups) 
+                CustomReaderValue =
+                    "System.Resources.ResXResourceReader, System.Windows.Forms, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
+                CustomWriterValue =
+                    "System.Resources.ResXResourceWriter, System.Windows.Forms, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+            })
             {
-                IList<LocalizationItem> items = new List<LocalizationItem>();
 
-                foreach (var item in group.Items) 
+                IDictionary<Group, IList<LocalizationItem>> filteredGroups =
+                    new Dictionary<Group, IList<LocalizationItem>>();
+
+                foreach (var group in document.Groups)
                 {
-                    var isFilterCheckPassed = 
-                        ApplyAppFilter(item, _writerConfig.AppsFilter) && 
-                        ApplyDotNetPlatformFilter(item) &&
-                        ApplyLanguageFilter(item, language);
-                    
-                    if (isFilterCheckPassed)
+                    IList<LocalizationItem> items = new List<LocalizationItem>();
+
+                    foreach (var item in group.Items)
                     {
-                        items.Add(item);
+                        var isFilterCheckPassed =
+                            ApplyAppFilter(item, _writerConfig.AppsFilter) &&
+                            ApplyDotNetPlatformFilter(item) &&
+                            ApplyLanguageFilter(item, language);
+
+                        if (isFilterCheckPassed)
+                        {
+                            items.Add(item);
+                        }
+                    }
+
+                    if (items.Count > 0)
+                    {
+                        filteredGroups.Add(group, items);
                     }
                 }
 
-                if (items.Count > 0)
+                foreach (var filteredGroup in filteredGroups)
                 {
-                    filteredGroups.Add(group, items);
+                    var group = filteredGroup.Key;
+                    var items = filteredGroup.Value;
+
+                    //xResources.Add(new XComment($" {group.Name} "));
+
+                    foreach (var item in items)
+                    {
+                        var key = item.Keys[Platforms.DotNet];
+                        var value = item.Values[language];
+
+                        writer.AddResource(key, PrepareValue(value));
+                    }
                 }
+
+                var fi = new FileInfo(_writerConfig.FileName);
+                var di = fi.Directory;
+                Debug.Assert(di != null, nameof(di) + " != null");
+                if (!di.Exists)
+                    di.Create();
             }
 
-            foreach (var filteredGroup in filteredGroups)
-            {
-                var group = filteredGroup.Key;
-                var items = filteredGroup.Value;
-                
-                //xResources.Add(new XComment($" {group.Name} "));
+            DeleteDesignerFile();
+        }
 
-                foreach (var item in items)
-                {
-                    var key = item.Keys[Platforms.DotNet];
-                    var value = item.Values[language];
+        private void DeleteDesignerFile()
+        {
+            var resxInfo = new FileInfo(_writerConfig.FileName);
+            var resxName = resxInfo.Name;
 
-                    writer.AddResource(key, PrepareValue( value));
-                }
-            }
+            var designerFileName = resxInfo.DirectoryName! + "\\" +
+                                   resxName[..^resxInfo.Extension.Length] + ".Designer.cs";
 
-            var fi = new FileInfo(_writerConfig.FileName);
-            var di = fi.Directory;
-            Debug.Assert(di != null, nameof(di) + " != null");
-            if (!di.Exists)
-                di.Create();
+            if (!File.Exists(designerFileName)) return;
             
-            writer.Close();
+            Console.WriteLine($"Delete .Net resource designer file... [{designerFileName}]");
+            File.Delete(designerFileName);
         }
         
         private bool ApplyAppFilter(LocalizationItem item, IList<string> appsFilter) 
