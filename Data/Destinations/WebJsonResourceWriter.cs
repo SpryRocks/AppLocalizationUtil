@@ -55,14 +55,21 @@ namespace AppLocalizationUtil.Data.Destinations
                         foreach (var key in keys)
                         {
                             NamespaceGroup namespaceGroup;
-                            if (!languageGroup.Namespaces.ContainsKey(key.ns))
+                            if (key.ns != null)
                             {
-                                namespaceGroup = new NamespaceGroup();
-                                languageGroup.Namespaces.Add(key.ns, namespaceGroup);
+                                if (!languageGroup.Namespaces.ContainsKey(key.ns))
+                                {
+                                    namespaceGroup = new NamespaceGroup();
+                                    languageGroup.Namespaces.Add(key.ns, namespaceGroup);
+                                }
+                                else
+                                {
+                                    namespaceGroup = languageGroup.Namespaces[key.ns];
+                                }
                             }
                             else
                             {
-                                namespaceGroup = languageGroup.Namespaces[key.ns];
+                                namespaceGroup = languageGroup.DefaultNamespace;
                             }
 
                             namespaceGroup.Translations.Add(key.value, value.Value);
@@ -81,6 +88,11 @@ namespace AppLocalizationUtil.Data.Destinations
 
                 jDocument.Add(new JProperty(languageId, jLanguage));
 
+                foreach (var item in language.Value.DefaultNamespace.Translations)
+                {
+                    jLanguage.Add(new JProperty(item.Key, item.Value));
+                }
+                
                 foreach (var ns in language.Value.Namespaces)
                 {
                     var jNs = new JObject();
@@ -135,17 +147,15 @@ namespace AppLocalizationUtil.Data.Destinations
         {
             return key.Split(';').Select(s =>
             {
-                string[] parts = s.Split(':');
-                if (parts.Length != 2)
-                    throw new Exception($"Bad key format: '{s}'. Key should be separated using symbol ':'");
-                
-                return (parts[0], parts[1]);
+                var parts = s.Split(':');
+                return parts.Length != 2 ? (null, parts[0]) : (parts[0], parts[1]);
             }).ToArray();
         }
 
         private class LanguageGroup
         {
             public IDictionary<string, NamespaceGroup> Namespaces { get; } = new Dictionary<string, NamespaceGroup>();
+            public NamespaceGroup DefaultNamespace { get; } = new NamespaceGroup();
         }
 
         private class NamespaceGroup
