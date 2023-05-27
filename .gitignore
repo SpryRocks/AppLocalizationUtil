@@ -4,3 +4,4 @@ obj
 *.xlsx
 .idea
 .vs
+node_modules/

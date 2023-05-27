@@ -1,0 +1,18 @@
+{
+  "name": "@spryrocks/localization-util",
+  "version": "1.0.1",
+  "bin": {
+    "update-localization": "./scripts/index.ts"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": "git@github.com:SpryRocks/AppLocalizationUtil.git",
+  "author": "maksim.zhemerenko <maksym.zhemerenko@paymash.com>",
+  "license": "MIT",
+  "dependencies": {
+    "ts-node": "^10.9.1",
+    "dotenv": "^16.0.3",
+    "node": "^20.2.0"
+  }
+}
