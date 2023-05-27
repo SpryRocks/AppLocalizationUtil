@@ -11,9 +11,9 @@ namespace AppLocalizationUtil.Data.Destinations
 {
     public class WebJsonResourceWriter
     {
-        private readonly DestinationResourceWriterConfigMultiLanguage _writerConfig;
+        private readonly DestinationResourceWriterConfigBase _writerConfig;
 
-        public WebJsonResourceWriter(DestinationResourceWriterConfigMultiLanguage writerConfig)
+        public WebJsonResourceWriter(DestinationResourceWriterConfigBase writerConfig)
         {
             _writerConfig = writerConfig;
         }
@@ -23,8 +23,8 @@ namespace AppLocalizationUtil.Data.Destinations
             Console.WriteLine($"Write Web resource .json file... [{_writerConfig.FileName}]");
 
             IDictionary<Language, LanguageGroup> languages = new Dictionary<Language, LanguageGroup>();
-            
-            foreach (var language in document.Languages) 
+
+            foreach (var language in document.Languages)
             {
                 if (!ApplyLanguageFilter(language))
                     continue;
@@ -84,7 +84,7 @@ namespace AppLocalizationUtil.Data.Destinations
             {
                 var languageId = language.Key.Id;
 
-                var jLanguage =  new JObject();
+                var jLanguage = new JObject();
 
                 jDocument.Add(new JProperty(languageId, jLanguage));
 
@@ -92,7 +92,7 @@ namespace AppLocalizationUtil.Data.Destinations
                 {
                     jLanguage.Add(new JProperty(item.Key, item.Value));
                 }
-                
+
                 foreach (var ns in language.Value.Namespaces)
                 {
                     var jNs = new JObject();
@@ -107,7 +107,7 @@ namespace AppLocalizationUtil.Data.Destinations
             }
 
             using (StreamWriter sw = new StreamWriter(_writerConfig.FileName))
-            using (JsonWriter writer = new JsonTextWriter(sw) { Formatting = Formatting.Indented })
+            using (JsonWriter writer = new JsonTextWriter(sw) {Formatting = Formatting.Indented})
             {
                 await jDocument.WriteToAsync(writer);
                 await sw.WriteLineAsync();
@@ -116,7 +116,14 @@ namespace AppLocalizationUtil.Data.Destinations
 
         private bool ApplyLanguageFilter(Language language)
         {
-            return _writerConfig.LanguageIdsFilter == null || _writerConfig.LanguageIdsFilter.Contains(language.Id);
+            return _writerConfig switch
+            {
+                DestinationResourceWriterConfigMultiLanguage config =>
+                    config.LanguageIdsFilter == null || config.LanguageIdsFilter.Contains(language.Id),
+                DestinationResourceWriterConfigSingleLanguage config =>
+                    config.LanguageId == language.Id,
+                _ => throw new NotSupportedException()
+            };
         }
 
         private bool ApplyWebPlatformFilter(LocalizationItem item)
@@ -124,7 +131,7 @@ namespace AppLocalizationUtil.Data.Destinations
             return item.Keys.ContainsKey(Platforms.Web);
         }
 
-        private bool ApplyAppFilter(LocalizationItem item, IList<string> appsFilter) 
+        private bool ApplyAppFilter(LocalizationItem item, IList<string> appsFilter)
         {
             foreach (var appFilter in appsFilter)
             {
