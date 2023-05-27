@@ -1,6 +1,6 @@
 {
   "name": "@spryrocks/localization-util",
-  "version": "1.0.1",
+  "version": "1.0.2-alpha.1",
   "bin": {
     "update-localization": "./scripts/index.ts"
   },

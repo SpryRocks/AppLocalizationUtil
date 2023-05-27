@@ -6,17 +6,20 @@ namespace AppLocalizationUtil.Data.Destinations
 {
     public class WebDestination : IDestination
     {
-        private readonly DestinationResourceWriterConfigMultiLanguage _config;
+        private readonly IList<DestinationResourceWriterConfigBase> _config;
 
-        public WebDestination(DestinationResourceWriterConfigMultiLanguage config)
+        public WebDestination(IList<DestinationResourceWriterConfigBase> config)
         {
             _config = config;
         }
 
         public async Task WriteAsync(Document document)
         {
-            var writer = new WebJsonResourceWriter(_config);
-            await writer.WriteAsync(document);
+            foreach (var config in _config)
+            {
+                var writer = new WebJsonResourceWriter(config);
+                await writer.WriteAsync(document);
+            }
         }
     }
 }

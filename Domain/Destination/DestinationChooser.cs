@@ -96,21 +96,47 @@ namespace AppLocalizationUtil.Domain.Destination
                 path += destinationPath;
             }
 
-            string fileConfig = destinationConfig.Value<string>("File");
-
-            string filePath = path;
-            if (!string.IsNullOrEmpty(filePath))
-                filePath += "/";
-            filePath += fileConfig;
-
             IDictionary<string, JContainer> filter =
                 destinationConfig["Filter"].ToObject<IDictionary<string, JContainer>>();
             IList<string> appsFilter = filter["App"].ToObject<IList<string>>();
 
-            var config =
-                new DestinationResourceWriterConfigMultiLanguage(filePath, languageIdsFilter: null,
-                    appsFilter: appsFilter);
-            return new WebDestination(config);
+            IDictionary<string, string> languageId_files =
+                destinationConfig["Files"]?.ToObject<IDictionary<string, string>>();
+            if (languageId_files != null)
+            {
+                var config = new List<DestinationResourceWriterConfigBase>();
+               
+                foreach (var languageId_file in languageId_files)
+                {
+                    string languageId = languageId_file.Key;
+                    string fileConfig = languageId_file.Value;
+
+                    string filePath = path;
+                    if (!string.IsNullOrEmpty(filePath))
+                        filePath += "/";
+                    filePath += fileConfig;
+
+                    config.Add(new DestinationResourceWriterConfigSingleLanguage(filePath, languageId, appsFilter));
+                }
+                
+                return new WebDestination(config);
+            }
+            else
+            {
+                string fileConfig = destinationConfig.Value<string>("File");
+                
+                string filePath = path;
+                if (!string.IsNullOrEmpty(filePath))
+                    filePath += "/";
+                filePath += fileConfig;
+
+                var config = new List<DestinationResourceWriterConfigBase>
+                {
+                    new DestinationResourceWriterConfigMultiLanguage(filePath, languageIdsFilter: null,
+                        appsFilter: appsFilter)
+                };
+                return new WebDestination(config);
+            }
         }
 
         private IDestination ChooseIOS(JObject destinationConfig)
