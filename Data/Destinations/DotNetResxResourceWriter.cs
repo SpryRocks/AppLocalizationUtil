@@ -27,7 +27,7 @@ namespace AppLocalizationUtil.Data.Destinations
         {
             Console.WriteLine($"Write .Net resource .resx file... [{_writerConfig.FileName}]");
 
-            var language = document.Languages.Single(l => l.Id == _writerConfig.LanguageId);
+            var language = document.FindLanguage(_writerConfig.LanguageId);
 
             using (var writer = new ResXResourceWriter(_writerConfig.FileName)
             {

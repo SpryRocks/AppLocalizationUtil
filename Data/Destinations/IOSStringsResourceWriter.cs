@@ -22,7 +22,7 @@ namespace AppLocalizationUtil.Data.Destinations
         {
             Console.WriteLine($"Write iOS resource .strings file... [{_writerConfig.FileName}]");
 
-            var language = document.Languages.Single(l => l.Id == _writerConfig.LanguageId);
+            var language = document.FindLanguage(_writerConfig.LanguageId);
             
             IDictionary<Group, IList<LocalizationItem>> filteredGroups = new Dictionary<Group, IList<LocalizationItem>>();
 

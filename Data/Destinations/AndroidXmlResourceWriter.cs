@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -23,7 +22,7 @@ namespace AppLocalizationUtil.Data.Destinations
         {
             Console.WriteLine($"Write Android resource .xml file... [{_writerConfig.FileName}]");
 
-            var language = document.Languages.Single(l => l.Id == _writerConfig.LanguageId);
+            var language = document.FindLanguage(_writerConfig.LanguageId);
             
             var xDocument = new XDocument();
             var xResources = new XElement("resources");
