@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 using AppLocalizationUtil.Data.Loaders.Crowdin.Api;
 using AppLocalizationUtil.Data.Loaders.Crowdin.Models;
@@ -25,7 +24,7 @@ namespace AppLocalizationUtil.Data.Sources
 
         public async Task<Document> LoadAsync()
         {
-            Console.WriteLine("Crowdin");
+            Console.WriteLine(@"Crowdin");
 
             var groups = new List<Group>();
             var languages = _config.Languages
@@ -35,28 +34,31 @@ namespace AppLocalizationUtil.Data.Sources
 
             var project = await _api.GetProject(ProjectId);
 
-            var files = (await GetFiles(_config.Directory)).ToArray();
+            var directory = await GetDirectory(_config.Directory);
+            var files = (await _api.GetFiles(ProjectId, directory.Id)).ToArray();
+
+            var strings = (await _api.GetStrings(ProjectId, directory.Id)).ToList();
+            var fileStrings = strings
+                .GroupBy(s => s.FileId)
+                .ToDictionary(
+                    s => s.Key,
+                    s => s as IEnumerable<CrowdinString>
+                );
+            var languageTranslations = await GetTranslationsAndGroupByLanguage(
+                project, languages.Values, strings
+            );
 
             foreach (var file in files)
             {
                 var name = GetGroupName(file);
-                Console.Write($"Reading... [{name}]");
 
-                var defaultLanguage = GetLanguageById(project, _config.DefaultLanguageId);
-                var strings = (await _api.GetStrings(ProjectId, file.Id)).ToArray();
-                var language_translations = new Dictionary<Language, IEnumerable<CrowdinTranslation>>();
+                var defaultLanguage = GetCrowdinLanguageById(project, _config.DefaultLanguageId);
 
-                foreach (var language in languages)
-                {
-                    if (language.Key == _config.DefaultLanguageId) continue;
-                    var crowdinLanguage = GetLanguageById(project, language.Key);
-                    language_translations.Add(language.Value,
-                        await _api.GetTranslations(ProjectId, file.Id, crowdinLanguage.Id));
-                }
+                var currentStrings = fileStrings[file.Id].ToList();
 
                 var items = new List<LocalizationItem>();
 
-                foreach (var crowdinString in strings)
+                foreach (var crowdinString in currentStrings)
                 {
                     var (key, stringPlatforms) = GetStringKeyAndPlatforms(crowdinString);
                     var keys = stringPlatforms.ToDictionary(sp => sp, _ => key);
@@ -65,13 +67,15 @@ namespace AppLocalizationUtil.Data.Sources
 
                     values.Add(languages[defaultLanguage.TwoLettersCode], crowdinString.Text);
 
-                    foreach (var language in language_translations.Keys)
+                    foreach (var language in languages.Values)
                     {
-                        var translations = language_translations[language].Where(t => t.StringId == crowdinString.Id);
-                        foreach (var translation in translations)
-                        {
-                            values.Add(language, translation.Text);
-                        }
+                        if (language.Id == _config.DefaultLanguageId) continue;
+                        var currentTranslations =
+                            FilterTranslationsByStringIds(languageTranslations[language.Id], currentStrings);
+                        var currentTranslation =
+                            currentTranslations.FirstOrDefault(t => t.StringId == crowdinString.Id);
+                        if (currentTranslation == null) continue;
+                        values.Add(language, currentTranslation.Text);
                     }
 
                     items.Add(new LocalizationItem
@@ -89,9 +93,7 @@ namespace AppLocalizationUtil.Data.Sources
                 };
                 groups.Add(group);
             }
-            
-            Console.WriteLine("Done");
-            
+
             return new Document
             {
                 Groups = groups,
@@ -100,19 +102,49 @@ namespace AppLocalizationUtil.Data.Sources
             };
         }
 
+        private async Task<IEnumerable<CrowdinTranslation>>
+            GetTranslationsAndFilterByStringIds(CrowdinLanguage language, ICollection<int> stringsIds)
+        {
+            var translations = await _api.GetTranslations(ProjectId, language.Id);
+            return FilterTranslationsByStringIds(translations, stringsIds);
+        }
+
+        private async Task<Dictionary<string, IEnumerable<CrowdinTranslation>>> GetTranslationsAndGroupByLanguage(
+            CrowdinProject project, IEnumerable<Language> languages, IEnumerable<CrowdinString> strings)
+        {
+            var stringsIds = strings.Select(s => s.Id).ToHashSet();
+            var dictionary = new Dictionary<string, IEnumerable<CrowdinTranslation>>();
+            await Parallel.ForEachAsync(languages, async (language,_) =>
+            {
+                var crowdinLanguage = GetCrowdinLanguageById(project, language.Id);
+                var translations = await GetTranslationsAndFilterByStringIds(crowdinLanguage, stringsIds);
+                dictionary[language.Id] = translations;
+            });
+
+            return dictionary;
+        }
+
+        private IEnumerable<CrowdinTranslation> FilterTranslationsByStringIds(
+            IEnumerable<CrowdinTranslation> translations,
+            IEnumerable<int> stringIds)
+        {
+            return translations.Where(t => stringIds.Contains(t.StringId));
+        }
+
+        private IEnumerable<CrowdinTranslation> FilterTranslationsByStringIds(
+            IEnumerable<CrowdinTranslation> translations,
+            IEnumerable<CrowdinString> strings)
+        {
+            var stringsIds = strings.Select(s => s.Id).ToHashSet();
+            return FilterTranslationsByStringIds(translations, stringsIds);
+        }
+
         private async Task<CrowdinDirectory> GetDirectory(string directoryName)
         {
             var directories = await _api.GetDirectories(ProjectId);
             var directory = directories.FirstOrDefault(d => d.Name == directoryName);
             if (directory == null) throw new Exception($"Directory with name {directoryName} not found");
             return directory;
-        }
-
-        private async Task<IEnumerable<CrowdinFile>> GetFiles(string directoryName)
-        {
-            var directory = await GetDirectory(directoryName);
-            var files = await _api.GetFiles(ProjectId, directory.Id);
-            return files;
         }
 
         private int ProjectId => _config.ProjectId;
@@ -147,7 +179,7 @@ namespace AppLocalizationUtil.Data.Sources
             return (key, platforms.ToArray());
         }
 
-        private CrowdinLanguage GetLanguageById(CrowdinProject project, string languageId)
+        private CrowdinLanguage GetCrowdinLanguageById(CrowdinProject project, string languageId)
         {
             var configLanguage = _config.Languages.FirstOrDefault(l => l.Id == languageId);
             if (configLanguage is {CrowdinId: not null})
