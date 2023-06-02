@@ -37,6 +37,7 @@ namespace AppLocalizationUtil.Data.Sources
             var directory = await GetDirectory(_config.Directory);
             var files = (await _api.GetFiles(ProjectId, directory.Id)).ToArray();
 
+            Console.WriteLine(@"Reading strings...");
             var strings = (await _api.GetStrings(ProjectId, directory.Id)).ToList();
             var fileStrings = strings
                 .GroupBy(s => s.FileId)
@@ -44,6 +45,7 @@ namespace AppLocalizationUtil.Data.Sources
                     s => s.Key,
                     s => s as IEnumerable<CrowdinString>
                 );
+            Console.WriteLine(@"Reading translations...");
             var languageTranslations = await GetTranslationsAndGroupByLanguage(
                 project, languages.Values, strings
             );

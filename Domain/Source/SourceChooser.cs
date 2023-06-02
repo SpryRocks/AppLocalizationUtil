@@ -56,11 +56,12 @@ namespace AppLocalizationUtil.Domain.Source
 
         private ISource ChooseCrowdin(JObject sourceConfig)
         {
+            var crowdinPlacement = sourceConfig.Value<JObject>("Placement");
             var crowdinConfig = sourceConfig.Value<JObject>("Config");
 
-            var apiKey = crowdinConfig.Value<string>("ApiKey");
-            var projectId = crowdinConfig.Value<int>("ProjectId");
-            var directory = crowdinConfig.Value<string>("Directory");
+            var apiKey = crowdinPlacement.Value<string>("ApiKey");
+            var projectId = crowdinPlacement.Value<int>("ProjectId");
+            var directory = crowdinPlacement.Value<string>("Directory");
             var defaultLanguageId = crowdinConfig.Value<string>("DefaultLanguageId");
             var defaultPlatform = crowdinConfig.Value<string>("DefaultPlatform");
             var languages = crowdinConfig.Value<JArray>("Languages");
