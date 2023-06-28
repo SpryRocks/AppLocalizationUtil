@@ -102,6 +102,7 @@ namespace AppLocalizationUtil.Domain.Destination
 
             IDictionary<string, string> languageId_files =
                 destinationConfig["Files"]?.ToObject<IDictionary<string, string>>();
+            var omitLanguageObject = destinationConfig.Value<bool>("OmitLanguageObject");
             if (languageId_files != null)
             {
                 var config = new List<DestinationResourceWriterConfigBase>();
@@ -116,7 +117,7 @@ namespace AppLocalizationUtil.Domain.Destination
                         filePath += "/";
                     filePath += fileConfig;
 
-                    config.Add(new DestinationResourceWriterConfigSingleLanguage(filePath, languageId, appsFilter));
+                    config.Add(new DestinationResourceWriterConfigSingleLanguage(filePath, languageId, appsFilter, omitLanguageObject));
                 }
                 
                 return new WebDestination(config);
@@ -133,7 +134,7 @@ namespace AppLocalizationUtil.Domain.Destination
                 var config = new List<DestinationResourceWriterConfigBase>
                 {
                     new DestinationResourceWriterConfigMultiLanguage(filePath, languageIdsFilter: null,
-                        appsFilter: appsFilter)
+                        appsFilter: appsFilter, omitLanguageObject)
                 };
                 return new WebDestination(config);
             }
