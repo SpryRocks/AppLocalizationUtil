@@ -80,29 +80,26 @@ namespace AppLocalizationUtil.Data.Destinations
 
             var jDocument = new JObject();
 
-            foreach (var language in languages)
+            if (_writerConfig.OmitLanguageObject)
             {
-                var languageId = language.Key.Id;
-
-                var jLanguage = new JObject();
-
-                jDocument.Add(new JProperty(languageId, jLanguage));
-
-                foreach (var item in language.Value.DefaultNamespace.Translations)
+                if (languages.Count > 1)
                 {
-                    jLanguage.Add(new JProperty(item.Key, item.Value));
+                    throw new Exception("There are more than 1 language and OmitLanguageObject is true");
                 }
+            }
 
-                foreach (var ns in language.Value.Namespaces)
+            if (languages.Count == 1 && _writerConfig.OmitLanguageObject)
+            {
+                var language = languages.Single();
+                WriteStringsContentToJObject(language, jDocument);
+            }
+            else
+            {
+                foreach (var language in languages)
                 {
-                    var jNs = new JObject();
-
-                    jLanguage.Add(ns.Key, jNs);
-
-                    foreach (var item in ns.Value.Translations)
-                    {
-                        jNs.Add(new JProperty(item.Key, item.Value));
-                    }
+                    var jLanguage = new JObject();
+                    WriteStringsContentToJObject(language, jLanguage);
+                    jDocument.Add(new JProperty(language.Key.Id, jLanguage));
                 }
             }
 
@@ -112,6 +109,28 @@ namespace AppLocalizationUtil.Data.Destinations
                 await jDocument.WriteToAsync(writer);
                 await sw.WriteLineAsync();
             }
+        }
+
+        private JObject WriteStringsContentToJObject(KeyValuePair<Language, LanguageGroup> language, JObject jLanguage)
+        {
+            foreach (var item in language.Value.DefaultNamespace.Translations)
+            {
+                jLanguage.Add(new JProperty(item.Key, item.Value));
+            }
+
+            foreach (var ns in language.Value.Namespaces)
+            {
+                var jNs = new JObject();
+
+                jLanguage.Add(ns.Key, jNs);
+
+                foreach (var item in ns.Value.Translations)
+                {
+                    jNs.Add(new JProperty(item.Key, item.Value));
+                }
+            }
+
+            return jLanguage;
         }
 
         private bool ApplyLanguageFilter(Language language)
